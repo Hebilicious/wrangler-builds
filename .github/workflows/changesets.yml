@@ -56,15 +56,58 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: moon run wrangler-builds:test
-      - run: moon run wrangler-builds:build
-      - run: moon run wrangler-builds:e2e
+      - name: Check if version is already published
+        id: version_check
+        run: |
+          VERSION=$(node -p "require('./packages/wrangler-builds/package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          PUBLISHED=$(npm view "@hebilicious/wrangler-builds@${VERSION}" version 2>/dev/null || true)
+          if [ -n "$PUBLISHED" ]; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.version_check.outputs.should_publish == 'true'
+        run: moon run wrangler-builds:test
+
+      - if: steps.version_check.outputs.should_publish == 'true'
+        run: moon run wrangler-builds:build
+
+      - if: steps.version_check.outputs.should_publish == 'true'
+        run: moon run wrangler-builds:e2e
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           WRANGLER_BUILDS_E2E_ACCOUNT_ID: ${{ secrets.WRANGLER_BUILDS_E2E_ACCOUNT_ID }}
           WRANGLER_BUILDS_E2E_BUILD_TOKEN_UUID: ${{ secrets.WRANGLER_BUILDS_E2E_BUILD_TOKEN_UUID }}
           WRANGLER_BUILDS_E2E_REPO_CONNECTION_UUID: ${{ secrets.WRANGLER_BUILDS_E2E_REPO_CONNECTION_UUID }}
 
-      - run: pnpm exec changeset publish
+      - if: steps.version_check.outputs.should_publish == 'true'
+        name: Pack package
+        id: pack
+        working-directory: packages/wrangler-builds
+        run: |
+          set -euo pipefail
+          rm -f ./*.tgz
+          pnpm pack
+          TARBALL=$(find . -maxdepth 1 -name '*.tgz' -print -quit)
+          if [ -z "$TARBALL" ]; then
+            echo "::error::Expected pnpm pack to create a tarball."
+            exit 1
+          fi
+          echo "tarball=${TARBALL#./}" >> "$GITHUB_OUTPUT"
+
+      - if: steps.version_check.outputs.should_publish == 'true'
+        name: Configure npm registry
+        run: |
+          echo "registry=https://registry.npmjs.org/" > "$HOME/.npmrc"
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" >> "$HOME/.npmrc"
+
+      - if: steps.version_check.outputs.should_publish == 'true'
+        name: Publish package
+        working-directory: packages/wrangler-builds
         env:
           NPM_CONFIG_PROVENANCE: "false"
+        run: |
+          set -euo pipefail
+          npm publish "${{ steps.pack.outputs.tarball }}" --access public --loglevel verbose
