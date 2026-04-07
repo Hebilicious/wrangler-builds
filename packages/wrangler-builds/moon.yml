@@ -1,0 +1,112 @@
+language: typescript
+layer: tool
+tags:
+  - cloudflare
+  - cli
+
+fileGroups:
+  sources:
+    - src/**/*
+    - schema/**/*
+  tests:
+    - tests/**/*
+
+tasks:
+  build:
+    command: pnpm
+    args:
+      - exec
+      - tsdown
+      - src/index.ts
+      - src/cli.ts
+      - --format
+      - esm
+      - --dts
+      - --out-dir
+      - dist
+      - --clean
+      - --unbundle
+    inputs:
+      - "@group(sources)"
+      - package.json
+      - tsconfig.json
+    outputs:
+      - dist
+
+  test:
+    command: pnpm
+    args:
+      - exec
+      - vitest
+      - run
+    inputs:
+      - "@group(sources)"
+      - "@group(tests)"
+      - package.json
+      - tsconfig.json
+
+  integration:
+    command: pnpm
+    args:
+      - exec
+      - vitest
+      - run
+      - tests/integration.test.ts
+    inputs:
+      - "@group(sources)"
+      - "@group(tests)"
+      - package.json
+      - tsconfig.json
+
+  typecheck:
+    command: pnpm
+    args:
+      - exec
+      - tsc
+      - -p
+      - tsconfig.json
+      - --noEmit
+    inputs:
+      - "@group(sources)"
+      - "@group(tests)"
+      - package.json
+      - tsconfig.json
+
+  lint:
+    command: pnpm
+    args:
+      - exec
+      - oxlint
+      - src
+      - tests
+      - --deny-warnings
+    inputs:
+      - "@group(sources)"
+      - "@group(tests)"
+      - package.json
+
+  format:
+    command: pnpm
+    args:
+      - exec
+      - oxfmt
+      - --check
+      - src
+      - tests
+      - tsconfig.json
+    inputs:
+      - "@group(sources)"
+      - "@group(tests)"
+      - tsconfig.json
+
+  format-fix:
+    command: pnpm
+    args:
+      - exec
+      - oxfmt
+      - --write
+      - src
+      - tests
+      - tsconfig.json
+    options:
+      cache: false

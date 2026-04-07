@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=./cache/schemas/workspace.json
+
+projects:
+  - "."
+  - "packages/*"
+
+pipeline:
+  logRunningCommand: true
+
+vcs:
+  client: git
+  defaultBranch: main

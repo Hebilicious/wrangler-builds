@@ -1,0 +1,50 @@
+{
+  "name": "@hebilicious/wrangler-builds",
+  "version": "0.1.0",
+  "description": "Project-agnostic Cloudflare Workers Build trigger sync package.",
+  "type": "module",
+  "packageManager": "pnpm@10.16.1",
+  "types": "./dist/index.d.mts",
+  "bin": {
+    "wrangler-builds": "./dist/cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "README.md",
+    "dist",
+    "schema"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": ">=24.5.0"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "wrangler",
+    "builds",
+    "cli"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "catalog:",
+    "citty": "catalog:",
+    "jsonc-parser": "catalog:",
+    "tinyglobby": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

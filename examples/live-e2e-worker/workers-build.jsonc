@@ -1,0 +1,15 @@
+{
+  "scriptName": "wrangler-builds-live-e2e-20260408",
+  "buildCommand": "echo desired-build",
+  "rootDirectory": "examples/live-e2e-worker",
+  "triggers": [
+    {
+      "name": "Deploy production",
+      "deployCommand": "npx wrangler deploy --config wrangler.jsonc",
+      "branchIncludes": ["main"],
+      "branchExcludes": [],
+      "pathIncludes": ["examples/live-e2e-worker/**"],
+      "pathExcludes": []
+    }
+  ]
+}
