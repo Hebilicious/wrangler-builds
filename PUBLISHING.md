@@ -33,6 +33,6 @@ Required environment variables for the live suite:
 - `WRANGLER_BUILDS_E2E_BUILD_TOKEN_UUID` if the example trigger must be bootstrapped
 - `WRANGLER_BUILDS_E2E_REPO_CONNECTION_UUID` if the example trigger must be bootstrapped
 
-The GitHub Actions workflow at [`.github/workflows/changesets.yml`](./.github/workflows/changesets.yml)
+The GitHub Actions workflow at [`.github/workflows/changesets.yaml`](./.github/workflows/changesets.yaml)
 handles the release flow after version changes are merged, and runs the live
 Cloudflare E2E task before publishing.
