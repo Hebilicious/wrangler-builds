@@ -1,6 +1,6 @@
 {
   "name": "@hebilicious/wrangler-builds",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Project-agnostic Cloudflare Workers Build trigger sync package.",
   "type": "module",
   "packageManager": "pnpm@10.16.1",
