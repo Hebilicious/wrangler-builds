@@ -38,6 +38,7 @@ tasks:
     inputs:
       - "@group(sources)"
       - "@group(tests)"
+      - README.md
       - package.json
       - tsconfig.json
 

@@ -28,6 +28,10 @@
   "bugs": {
     "url": "https://github.com/Hebilicious/wrangler-builds/issues"
   },
+  "scripts": {
+    "sync-readme": "node ./scripts/sync-readme.mjs",
+    "prepack": "pnpm run sync-readme"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

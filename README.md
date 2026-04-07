@@ -92,6 +92,7 @@ moon run workspace:version
 ```
 
 The live end-to-end suite runs against the example worker in
-[`examples/live-e2e-worker`](./examples/live-e2e-worker).
+[`examples/live-e2e-worker`](https://github.com/Hebilicious/wrangler-builds/tree/main/examples/live-e2e-worker).
 
-Release workflow details live in [`PUBLISHING.md`](./PUBLISHING.md).
+Release workflow details live in
+[`PUBLISHING.md`](https://github.com/Hebilicious/wrangler-builds/blob/main/PUBLISHING.md).
