@@ -44,11 +44,18 @@ jobs:
     needs: release
     if: needs.release.outputs.hasChangesets == 'false'
     runs-on: ubuntu-latest
+    concurrency:
+      group: live-e2e-${{ github.ref_name }}
+      cancel-in-progress: false
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: git fetch origin main:refs/remotes/origin/main
 
       - uses: moonrepo/setup-toolchain@v0
         with:
