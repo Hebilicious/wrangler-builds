@@ -77,7 +77,7 @@ tasks:
       - tsconfig.json
     options:
       cache: false
-      runInCI: false
+      runInCI: true
 
   typecheck:
     command: tsc
