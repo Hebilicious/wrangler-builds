@@ -16,6 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: git fetch origin main:refs/remotes/origin/main
 
       - uses: moonrepo/setup-toolchain@v0
         with:
@@ -34,6 +38,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: git fetch origin main:refs/remotes/origin/main
 
       - uses: moonrepo/setup-toolchain@v0
         with:
