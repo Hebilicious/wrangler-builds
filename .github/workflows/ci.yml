@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: moonrepo/setup-toolchain@v0
+        with:
+          auto-install: true
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: moon run wrangler-builds:typecheck
+      - run: moon run wrangler-builds:test
+      - run: moon run wrangler-builds:build
+
+  live-e2e:
+    name: Live E2E
+    needs: validate
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: moonrepo/setup-toolchain@v0
+        with:
+          auto-install: true
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: moon run wrangler-builds:e2e
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_BUILDS_E2E_ACCOUNT_ID: ${{ secrets.WRANGLER_BUILDS_E2E_ACCOUNT_ID }}
+          WRANGLER_BUILDS_E2E_BUILD_TOKEN_UUID: ${{ secrets.WRANGLER_BUILDS_E2E_BUILD_TOKEN_UUID }}
+          WRANGLER_BUILDS_E2E_REPO_CONNECTION_UUID: ${{ secrets.WRANGLER_BUILDS_E2E_REPO_CONNECTION_UUID }}

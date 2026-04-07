@@ -52,12 +52,14 @@ export const createCloudflareClient = ({
 
   const getExternalScriptIdsByName = async (): Promise<Map<string, string>> => {
     if (!externalScriptIdsByNamePromise) {
-      externalScriptIdsByNamePromise = request<{ id?: string }>("/workers/scripts").then((data) => {
+      externalScriptIdsByNamePromise = request<{ id?: string; tag?: string }>(
+        "/workers/scripts",
+      ).then((data) => {
         const scripts = new Map<string, string>();
 
-        for (const script of normalizeList<{ id?: string }>(data.result)) {
-          if (typeof script.id === "string") {
-            scripts.set(script.id, script.id);
+        for (const script of normalizeList<{ id?: string; tag?: string }>(data.result)) {
+          if (typeof script.id === "string" && typeof script.tag === "string") {
+            scripts.set(script.id, script.tag);
           }
         }
 

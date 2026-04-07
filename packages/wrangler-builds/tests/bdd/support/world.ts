@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-import { After, Before, World, setWorldConstructor } from "@cucumber/cucumber";
+import { After, Before, World, setDefaultTimeout, setWorldConstructor } from "@cucumber/cucumber";
 import { parse } from "jsonc-parser";
 
 const execFileAsync = promisify(execFile);
@@ -14,6 +14,7 @@ const repoRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
 const cliPath = fileURLToPath(new URL("../../../dist/cli.mjs", import.meta.url));
 const exampleConfigPath = join(repoRoot, "examples/live-e2e-worker/workers-build.jsonc");
 const driftedBuildCommand = "echo bdd-live-drift";
+const liveStepTimeoutMs = 30_000;
 
 interface TriggerConfigShape {
   name?: unknown;
@@ -113,6 +114,7 @@ export class LiveCliWorld extends World {
   exitCode = 0;
   tempDirs: string[] = [];
   scriptName = "";
+  externalScriptId = "";
   expectedTrigger!: TriggerPayload;
   currentTriggerName = "";
 
@@ -120,6 +122,7 @@ export class LiveCliWorld extends World {
     const configText = await readFile(exampleConfigPath, "utf8");
     const example = parseExampleConfig(configText);
     this.scriptName = example.scriptName;
+    this.externalScriptId = "";
     this.expectedTrigger = example.trigger;
     this.currentTriggerName = example.trigger.trigger_name;
     this.configPath = exampleConfigPath;
@@ -158,7 +161,7 @@ export class LiveCliWorld extends World {
         body: JSON.stringify({
           ...this.expectedTrigger,
           build_token_uuid: this.buildTokenUuid,
-          external_script_id: this.scriptName,
+          external_script_id: await this.getExternalScriptId(),
           repo_connection_uuid: this.repoConnectionUuid,
         }),
       },
@@ -291,19 +294,30 @@ export class LiveCliWorld extends World {
     await this.patchTrigger(trigger.trigger_uuid, this.expectedTrigger);
   }
 
-  private async ensureScriptExists(): Promise<void> {
-    const scripts = await this.request<Array<{ id?: string }>>(
+  private async getExternalScriptId(): Promise<string> {
+    if (this.externalScriptId) {
+      return this.externalScriptId;
+    }
+
+    const scripts = await this.request<Array<{ id?: string; tag?: string }>>(
       `/accounts/${this.accountId}/workers/scripts`,
     );
-    const found = Array.isArray(scripts)
-      ? scripts.some((script) => script?.id === this.scriptName)
-      : false;
+    const externalScriptId = Array.isArray(scripts)
+      ? (scripts.find((script) => script?.id === this.scriptName)?.tag ?? "")
+      : "";
 
-    if (!found) {
+    if (!externalScriptId) {
       throw new Error(
         `Cloudflare Worker script ${this.scriptName} was not found. Deploy the live example worker before running BDD.`,
       );
     }
+
+    this.externalScriptId = externalScriptId;
+    return externalScriptId;
+  }
+
+  private async ensureScriptExists(): Promise<void> {
+    await this.getExternalScriptId();
   }
 
   private async requireTrigger(name: string): Promise<RemoteTrigger> {
@@ -317,8 +331,9 @@ export class LiveCliWorld extends World {
   }
 
   private async getTriggerByName(name: string): Promise<RemoteTrigger | null> {
+    const externalScriptId = await this.getExternalScriptId();
     const triggers = await this.request<RemoteTrigger[]>(
-      `/accounts/${this.accountId}/builds/workers/${this.scriptName}/triggers`,
+      `/accounts/${this.accountId}/builds/workers/${externalScriptId}/triggers`,
     );
 
     return Array.isArray(triggers)
@@ -367,4 +382,5 @@ After(async function () {
   await this.cleanup();
 });
 
+setDefaultTimeout(liveStepTimeoutMs);
 setWorldConstructor(LiveCliWorld);
