@@ -1,0 +1,8 @@
+pre-commit:
+  commands:
+    format:
+      run: moon run :format
+    lint:
+      run: moon run :lint
+    typecheck:
+      run: moon run :typecheck

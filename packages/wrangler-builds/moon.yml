@@ -13,10 +13,8 @@ fileGroups:
 
 tasks:
   build:
-    command: pnpm
+    command: tsdown
     args:
-      - exec
-      - tsdown
       - src/index.ts
       - src/cli.ts
       - --format
@@ -34,10 +32,8 @@ tasks:
       - dist
 
   test:
-    command: pnpm
+    command: vitest
     args:
-      - exec
-      - vitest
       - run
     inputs:
       - "@group(sources)"
@@ -45,24 +41,47 @@ tasks:
       - package.json
       - tsconfig.json
 
-  integration:
-    command: pnpm
+  bdd:
+    deps:
+      - build
+    description: Run the Cloudflare-backed Cucumber scenarios for the live example worker.
+    command: node
     args:
-      - exec
-      - vitest
-      - run
-      - tests/integration.test.ts
+      - --import
+      - tsx
+      - ./node_modules/@cucumber/cucumber/bin/cucumber.js
     inputs:
       - "@group(sources)"
       - "@group(tests)"
+      - cucumber.mjs
       - package.json
       - tsconfig.json
+    options:
+      cache: false
+      runInCI: false
+
+  e2e:
+    deps:
+      - build
+    description: Run the live Cloudflare end-to-end suite for the example worker.
+    command: node
+    args:
+      - --import
+      - tsx
+      - ./node_modules/@cucumber/cucumber/bin/cucumber.js
+    inputs:
+      - "@group(sources)"
+      - "@group(tests)"
+      - cucumber.mjs
+      - package.json
+      - tsconfig.json
+    options:
+      cache: false
+      runInCI: false
 
   typecheck:
-    command: pnpm
+    command: tsc
     args:
-      - exec
-      - tsc
       - -p
       - tsconfig.json
       - --noEmit
@@ -73,10 +92,8 @@ tasks:
       - tsconfig.json
 
   lint:
-    command: pnpm
+    command: oxlint
     args:
-      - exec
-      - oxlint
       - src
       - tests
       - --deny-warnings
@@ -86,10 +103,8 @@ tasks:
       - package.json
 
   format:
-    command: pnpm
+    command: oxfmt
     args:
-      - exec
-      - oxfmt
       - --check
       - src
       - tests
@@ -100,10 +115,8 @@ tasks:
       - tsconfig.json
 
   format-fix:
-    command: pnpm
+    command: oxfmt
     args:
-      - exec
-      - oxfmt
       - --write
       - src
       - tests
