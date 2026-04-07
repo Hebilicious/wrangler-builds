@@ -48,32 +48,32 @@ export const createCloudflareClient = ({
     return data;
   };
 
-  let scriptsByNamePromise: Promise<Map<string, string>> | undefined;
+  let externalScriptIdsByNamePromise: Promise<Map<string, string>> | undefined;
 
-  const getScriptsByName = async (): Promise<Map<string, string>> => {
-    if (!scriptsByNamePromise) {
-      scriptsByNamePromise = request<{ id?: string; tag?: string }>("/workers/scripts").then(
-        (data) => {
-          const scripts = new Map<string, string>();
+  const getExternalScriptIdsByName = async (): Promise<Map<string, string>> => {
+    if (!externalScriptIdsByNamePromise) {
+      externalScriptIdsByNamePromise = request<{ id?: string; tag?: string }>(
+        "/workers/scripts",
+      ).then((data) => {
+        const scripts = new Map<string, string>();
 
-          for (const script of normalizeList<{ id?: string; tag?: string }>(data.result)) {
-            if (typeof script.id === "string" && typeof script.tag === "string") {
-              scripts.set(script.id, script.tag);
-            }
+        for (const script of normalizeList<{ id?: string; tag?: string }>(data.result)) {
+          if (typeof script.id === "string" && typeof script.tag === "string") {
+            scripts.set(script.id, script.tag);
           }
+        }
 
-          return scripts;
-        },
-      );
+        return scripts;
+      });
     }
 
-    return scriptsByNamePromise;
+    return externalScriptIdsByNamePromise;
   };
 
   return {
     async listTriggers(scriptName: string): Promise<RemoteTrigger[]> {
-      const scriptsByName = await getScriptsByName();
-      const externalScriptId = scriptsByName.get(scriptName);
+      const externalScriptIdsByName = await getExternalScriptIdsByName();
+      const externalScriptId = externalScriptIdsByName.get(scriptName);
 
       if (!externalScriptId) {
         throw new Error(`Cloudflare Workers script ${scriptName} was not found.`);

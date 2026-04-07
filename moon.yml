@@ -1,2 +1,22 @@
 id: workspace
 layer: configuration
+
+tasks:
+  changeset:
+    command: changeset
+    args:
+    options:
+      cache: false
+
+  changeset-status:
+    command: changeset
+    args:
+      - status
+      - --verbose
+
+  version:
+    command: changeset
+    args:
+      - version
+    options:
+      cache: false

@@ -1,6 +1,6 @@
 {
   "name": "@hebilicious/wrangler-builds",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Project-agnostic Cloudflare Workers Build trigger sync package.",
   "type": "module",
   "packageManager": "pnpm@10.16.1",
@@ -19,8 +19,22 @@
     "dist",
     "schema"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hebilicious/wrangler-builds.git",
+    "directory": "packages/wrangler-builds"
+  },
+  "homepage": "https://github.com/Hebilicious/wrangler-builds/tree/main/packages/wrangler-builds",
+  "bugs": {
+    "url": "https://github.com/Hebilicious/wrangler-builds/issues"
+  },
+  "scripts": {
+    "sync-readme": "node ./scripts/sync-readme.mjs",
+    "prepack": "pnpm run sync-readme"
+  },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "engines": {
     "node": ">=24.5.0"
@@ -40,9 +54,11 @@
     "tinyglobby": "catalog:"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "catalog:",
     "@types/node": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
+    "tsx": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

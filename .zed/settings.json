@@ -1,0 +1,12 @@
+{
+  "lsp": {
+    "cucumber": {
+      "settings": {
+        "glue": [
+          "packages/wrangler-builds/tests/bdd/step-definitions/**/*.ts",
+          "packages/wrangler-builds/tests/bdd/support/**/*.ts"
+        ]
+      }
+    }
+  }
+}

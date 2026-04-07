@@ -22,7 +22,7 @@ afterEach(async () => {
 });
 
 describe("runSync integration", () => {
-  it("discovers configs, parses JSONC, plans updates, and applies patches deterministically", async () => {
+  it("uses the Cloudflare external script ID when resolving triggers", async () => {
     const cwd = await makeTempDir();
     const configDir = join(cwd, "packages", "demo");
     const configPath = join(configDir, "workers-build.jsonc");
@@ -58,7 +58,7 @@ describe("runSync integration", () => {
         return new Response(
           JSON.stringify({
             success: true,
-            result: [{ id: "external-script-id", tag: "demo-worker" }],
+            result: [{ id: "demo-worker", tag: "external-script-id" }],
           }),
         );
       }

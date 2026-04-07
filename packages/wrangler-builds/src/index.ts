@@ -10,6 +10,7 @@ export { discoverConfigFiles } from "./discovery.js";
 export { formatActionMessage } from "./output.js";
 export { buildProjectPlan, createDesiredTriggerPayload, needsTriggerUpdate } from "./plan.js";
 export { validateWorkersBuildConfig } from "./schema.js";
+export { getCurrentConfig, runShow } from "./show.js";
 export { runSync, syncWorkersBuildConfigs } from "./sync.js";
 export type {
   CloudflareClient,
